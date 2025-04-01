@@ -100,6 +100,17 @@ class InversionSetGame {
                 p {
                     font-size: 18px;
                 }
+                /* New CSS rules to visually separate the sentences */
+      .original-sentence {
+        color: #FFD700;      /* Gold color */
+        font-weight: bold;
+        margin-bottom: 0.5em;
+      }
+      .gapped-sentence {
+        color: #00FFFF;      /* Cyan color */
+        font-style: italic;
+        margin-top: 0;
+      }
                 /* Answer input: centralized, wider */
                 input {
                     padding: 10px;
@@ -244,19 +255,26 @@ class InversionSetGame {
     }
 
     updateSentence() {
-        // If we've done all 12, end the game
-        if (this.currentIndex >= this.totalSentences) {
-            this.endGame();
-            return;
-        }
-        // Otherwise, show the next sentence
-        document.getElementById("counter").textContent = `Sentence: ${this.currentIndex + 1}/${this.totalSentences}`;
-        const currentSentence = this.sentences[this.currentIndex];
-        document.getElementById("sentence").textContent =
-            `${currentSentence.sentence}\n\n${currentSentence.incompleteSentence}`;
-        const input = document.getElementById("answer");
-        input.value = "";
-        input.focus();
+  // If we've done all 12, end the game
+  if (this.currentIndex >= this.totalSentences) {
+      this.endGame();
+      return;
+  }
+
+  // Otherwise, show the next sentence
+  document.getElementById("counter").textContent = 
+    `Sentence: ${this.currentIndex + 1}/${this.totalSentences}`;
+  const currentSentence = this.sentences[this.currentIndex];
+
+  // Instead of .textContent, we use .innerHTML with two distinct <p> tags
+  document.getElementById("sentence").innerHTML = `
+    <p class="original-sentence">${currentSentence.sentence}</p>
+    <p class="gapped-sentence">${currentSentence.incompleteSentence}</p>
+  `;
+
+  const input = document.getElementById("answer");
+  input.value = "";
+  input.focus();
 
         // Start the 40s timer
         this.startClickTime = Date.now();
@@ -728,7 +746,216 @@ const sentences = [
         sentence: "He didn't realize the error of his ways until she threatened to leave him.", 
         incompleteSentence: "Not until she ________ realize the error of his ways.", 
         correctAnswer: "threatened to leave him did he"
-    }
+    },
+    {
+    sentence: "I had never expected to win the lottery.",
+    incompleteSentence: "Never ______ the lottery.",
+    correctAnswer: "had I expected to win"
+  },
+  {
+    sentence: "I had never considered such an outcome possible.",
+    incompleteSentence: "Never ______ outcome possible.",
+    correctAnswer: "had I considered such an"
+  },
+
+  // RARELY
+  {
+    sentence: "I had rarely seen a sunset as beautiful as that.",
+    incompleteSentence: "Rarely ______ beautiful as that.",
+    correctAnswer: "had I seen a sunset as"
+  },
+  {
+    sentence: "I have rarely witnessed such extraordinary courage.",
+    incompleteSentence: "Rarely ______ extraordinary courage.",
+    correctAnswer: "have I witnessed such"
+  },
+
+  // SELDOM
+  {
+    sentence: "I seldom encountered problems of this magnitude.",
+    incompleteSentence: "Seldom ______ this magnitude.",
+    correctAnswer: "did I encounter problems of"
+  },
+  {
+    sentence: "I seldom thought the project would succeed.",
+    incompleteSentence: "Seldom ______ succeed.",
+    correctAnswer: "did I think the project would"
+  },
+
+  // HARDLY EVER
+  {
+    sentence: "I hardly ever participate in community events in the neighbourhood.",
+    incompleteSentence: "Hardly ever ______ events in the neighbourhood.",
+    correctAnswer: "do I participate in community"
+  },
+  
+  // NOT UNTIL...
+  {
+    sentence: "I didn’t notice my mistake until I had examined all the evidence.",
+    incompleteSentence: "Not until I had ______ notice my mistake.",
+    correctAnswer: "examined all the evidence did I"
+  },
+  {
+    sentence: "I didn’t appreciate the importance of family until I had been isolated.",
+    incompleteSentence: "Not until I had ______ the importance of family.",
+    correctAnswer: "been isolated did I appreciate"
+  },
+  // NO SOONER... THAN...
+  {
+    sentence: "I opened the door and immediately I recognized her voice.",
+    incompleteSentence: "No sooner ______ I recognized her voice.",
+    correctAnswer: "had I opened the door than"
+  },
+
+  // SCARCELY... WHEN...
+  {
+    sentence: "I had just sat down when the performance began.",
+    incompleteSentence: "Scarcely ______ the performance began.",
+    correctAnswer: "had I sat down when"
+  },
+  {
+    sentence: "I understood the truth when she finally spoke up.",
+    incompleteSentence: "Only when she ______ the truth.",
+    correctAnswer: "finally spoke up did I understand"
+  },
+
+  // ONLY AFTER...
+  {
+    sentence: "I learned my lesson after I made a costly mistake.",
+    incompleteSentence: "Only after I had ______ my lesson.",
+    correctAnswer: "made a costly mistake did I learn"
+  },
+  {
+    sentence: "I appreciated my freedom after I was confined for a while.",
+    incompleteSentence: "Only after ______ my freedom.",
+    correctAnswer: "I was confined did I appreciate"
+  },
+
+  // ONLY IF...
+  {
+    sentence: "I will forgive him if he apologizes sincerely.",
+    incompleteSentence: "Only if he ______ will I forgive him.",
+    correctAnswer: "apologizes sincerely will I"
+  },
+  {
+    sentence: "I attend the party if I'm invited.",
+    incompleteSentence: "Only if ______ the party.",
+    correctAnswer: "I am invited will I attend"
+  },
+  {
+    sentence: "I grasped the full impact of the decision later.",
+    incompleteSentence: "Only later ______ impact of the decision.",
+    correctAnswer: "did I grasp the full"
+  },
+  {
+    sentence: "I recognized the consequences of my actions later.",
+    incompleteSentence: "Only later ______ of my actions.",
+    correctAnswer: "did I recognize the consequences"
+  },
+
+  // ONLY BY...
+  {
+    sentence: "I managed to solve the p uzzle by thinking outside the box.",
+    incompleteSentence: "Only by thinking______ to solve the puzzle.",
+    correctAnswer: "outside the box did I manage"
+  },
+  {
+    sentence: "I achieved victory by sacrificing my comfort.",
+    incompleteSentence: "Only by sacrificing______ victory.",
+    correctAnswer: "my comfort did I achieve"
+  },
+
+  // ONLY IN THIS WAY...
+  {
+    sentence: "I was able to foster unity in the group through a unique approach.",
+    incompleteSentence: "Only in this way ______ unity in the group.",
+    correctAnswer: "was I able to foster"
+  },
+
+  // NOT ONLY... BUT ALSO...
+  {
+    sentence: "I completed the assignment and exceeded expectations.",
+    incompleteSentence: "Not only ______ but also exceeded expectations.",
+    correctAnswer: "did I complete the assignment"
+  },
+  {
+    sentence: "I mastered the instrument and learned its theory.",
+    incompleteSentence: "Not only ______ but also learned its theory.",
+    correctAnswer: "did I master the instrument"
+  },
+
+  // NOWHERE
+  {
+    sentence: "I found a location that was unrivaled in beauty.",
+    incompleteSentence: "Nowhere ______ as unrivaled in beauty.",
+    correctAnswer: "did I find a location"
+  },
+
+  // IN NO WAY
+  {
+    sentence: "I cannot justify his actions in any manner.",
+    incompleteSentence: "In no way ______ actions.",
+    correctAnswer: "can I justify his"
+  },
+
+  // AT NO TIME
+  {
+    sentence: "I never suspected his true intentions.",
+    incompleteSentence: "At no time ______ true intentions.",
+    correctAnswer: "did I suspect his"
+  },
+
+  // UNDER NO CIRCUMSTANCES
+  {
+    sentence: "I wouldn’t compromise my principles under any circumstances.",
+    incompleteSentence: "Under ______ my principles.",
+    correctAnswer: "no circumstances would I compromise"
+  },
+
+  // ON NO ACCOUNT
+  {
+    sentence: "I will tolerate such behaviour under any condition.",
+    incompleteSentence: "On no ______ such behaviour.",
+    correctAnswer: "account will I tolerate"
+  },
+
+  // IN NO CASE
+  {
+    sentence: "I would allow that mistake in any situation.",
+    incompleteSentence: "In no case ______ mistake.",
+    correctAnswer: "would I allow that"
+  },
+  {
+    sentence: "I realized the truth about the matter very late.",
+    incompleteSentence: "Little ______ about the matter.",
+    correctAnswer: "did I realize the truth"
+  },
+  {
+    sentence: "I recognized his talent only after I had listened to his performance.",
+    incompleteSentence: "Only after I had ________  I recognize his talent.",
+    correctAnswer: "listened to his performance did"
+  },
+  {
+    sentence: "I would attend the meeting only if I were invited.",
+    incompleteSentence: "Only if ________ the meeting",
+    correctAnswer: "I were invited would I attend"
+  },
+  {
+    sentence: "I understood the consequences only later.",
+    incompleteSentence: "Only  ________ the consequences.",
+    correctAnswer: "later did I understand"
+  },
+  {
+    sentence: "I succeeded only by persevering through hardships.",
+    incompleteSentence: "Only by ________  I succeed.",
+    correctAnswer: "persevering through hardships did"
+  },
+  {
+    sentence: "I achieved success only in this way.",
+    incompleteSentence: "Only in this  ________ success.",
+    correctAnswer: "way could I achieve"
+  }
+
 ];
 
 const game = new InversionSetGame(sentences);
