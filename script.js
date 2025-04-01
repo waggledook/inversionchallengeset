@@ -1,3 +1,21 @@
+// Define loadScript if not already defined
+function loadScript(url, callback) {
+  const script = document.createElement("script");
+  script.src = url;
+  script.onload = callback;
+  document.head.appendChild(script);
+}
+
+// Load jsPDF and AutoTable
+loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", () => {
+  loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js", () => {
+    console.log("jsPDF and AutoTable loaded!");
+  });
+});
+
+// The rest of your code (including the InversionSetGame class) follows...
+
+
 class InversionSetGame {
     constructor(sentences) {
         this.originalSentences = sentences;
@@ -275,6 +293,10 @@ class InversionSetGame {
         const currentSet = this.reviewMode ? this.wrongAnswers : this.sentences;
         const currentSentence = currentSet[this.currentIndex];
         const correctAnswer = currentSentence.correctAnswer.toLowerCase();
+        
+         // Record the user's answer and whether it is correct
+         currentSentence.userAnswer = userInput || "(no answer)";
+         currentSentence.wasCorrect = (userInput === correctAnswer);
 
         // Determine how many points are left based on time
         let elapsed = Date.now() - this.startClickTime;
@@ -410,28 +432,75 @@ class InversionSetGame {
     }
 
     generateReport() {
-        if (this.wrongAnswers.length === 0) {
-            alert("No mistakes were made. Great job!");
-            return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Set the report title
+  doc.setFontSize(16);
+  doc.setTextColor(0, 0, 150);
+  doc.text("Inversion Sentence Challenge (Set Mode) - Full Report", 14, 20);
+
+  // Build rows for the report.
+  // Each row: [Sentence #, Original Sentence, Gapped Sentence, Your Answer, Correct Answer, Result]
+  let tableRows = [];
+  this.sentences.forEach((s, index) => {
+    const yourAnswer = s.userAnswer || "(no answer)";
+    const result = (yourAnswer.trim().toLowerCase() === s.correctAnswer.trim().toLowerCase())
+      ? "Correct" : "Incorrect";
+
+    tableRows.push([
+      index + 1,
+      s.sentence,            // Original Sentence
+      s.incompleteSentence,  // Gapped Sentence
+      yourAnswer,            // Your Answer
+      s.correctAnswer,       // Correct Answer
+      result                 // Result
+    ]);
+  });
+
+  // Generate the table with AutoTable.
+  doc.autoTable({
+    startY: 30,
+    head: [["#", "Original Sentence", "Gapped Sentence", "Your Answer", "Correct Answer", "Result"]],
+    body: tableRows,
+    headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+    bodyStyles: { fontSize: 10, cellPadding: 3 },
+    alternateRowStyles: { fillColor: [255, 255, 255] },
+    margin: { left: 10, right: 10 },
+    styles: { overflow: 'linebreak' },
+    didParseCell: function(data) {
+      if (data.section === 'body') {
+        // "Your Answer" column is now index 3
+        if (data.column.index === 3) {
+          let userAns = data.cell.raw;
+          let correctAns = data.row.raw[4]; // Correct Answer is at index 4
+          if (userAns.trim().toLowerCase() === correctAns.trim().toLowerCase()) {
+            data.cell.styles.textColor = [0, 128, 0]; // Green for correct
+          } else {
+            data.cell.styles.textColor = [255, 0, 0]; // Red for incorrect
+          }
+          data.cell.styles.fontStyle = "bold";
         }
-        let reportText = "Inversion Sentence Challenge (Set Mode) - Mistakes Report\n\n";
-        this.wrongAnswers.forEach(mistake => {
-            const userAnswer = mistake.userAnswer || "(no answer)";
-            const correctAnswer = mistake.correctAnswer;
-            const userSentence = mistake.incompleteSentence.replace("______", userAnswer);
-            const correctSentence = mistake.incompleteSentence.replace("______", correctAnswer);
-            reportText += `Original sentence: "${mistake.sentence}"\n`;
-            reportText += `You wrote: "${userSentence}"\n`;
-            reportText += `The correct answer is: "${correctSentence}"\n\n`;
-        });
-        const blob = new Blob([reportText], { type: "text/plain" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "inversion_set_game_report.txt";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // "Correct Answer" column (index 4)
+        if (data.column.index === 4) {
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.textColor = [0, 0, 0]; // Always black
+        }
+        // "Result" column (index 5)
+        if (data.column.index === 5) {
+          if (data.cell.raw === "Correct") {
+            data.cell.styles.textColor = [0, 128, 0];
+          } else if (data.cell.raw === "Incorrect") {
+            data.cell.styles.textColor = [255, 0, 0];
+          }
+          data.cell.styles.fontStyle = "bold";
+        }
+      }
     }
+  });
+
+  doc.save("Inversion_Sentence_Challenge_Full_Report.pdf");
+}
 
     restartGame() {
         this.gameActive = false;
